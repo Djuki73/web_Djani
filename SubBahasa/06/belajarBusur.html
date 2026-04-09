@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Busur Derajat - Posisi Acak</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 10px;
+        }
+        .simulation-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            border: 3px solid #333;
+            background-color: #fff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            border-radius: 12px;
+            touch-action: none;
+        }
+        #angleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #protractor {
+            position: absolute;
+            z-index: 2;
+            width: 400px; 
+            transform-origin: 50% 100%;
+            cursor: grab;
+            user-select: none;
+        }
+        #protractor img {
+            width: 100%;
+            display: block;
+            opacity: 0.65;
+            pointer-events: none;
+        }
+        #rotate-handle {
+            position: absolute;
+            bottom: -15px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 35px;
+            cursor: alias;
+            background-color: #ff4757;
+            border: 3px solid white;
+            border-radius: 50%;
+            z-index: 3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input[type="number"] {
+            padding: 8px;
+            width: 70px;
+            font-size: 1.1rem;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        #checkBtn { background-color: #2f3542; color: white; }
+        #newAngleBtn { background-color: #2ed573; color: white; }
+        
+        #feedback {
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-height: 1.5em;
+        }
+        .correct { color: #2ed573; }
+        .wrong { color: #ff4757; }
+    </style>
+</head>
+<body>
+
+    <h1 style="color: #2f3542; margin-bottom: 5px; font-size: 1.4rem;">Simulasi Busur Derajat</h1>
+    <p style="margin-bottom: 10px; font-size: 0.9rem; color: #57606f;">Seret busur ke titik merah dan ukur besarnya.</p>
+
+    <div class="simulation-container">
+        <canvas id="angleCanvas"></canvas>
+        <div id="protractor" style="left: 10px; top: 10px;">
+            <img src="img/busur_derajat2.png" alt="Busur Derajat">
+            <div id="rotate-handle" title="Putar Busur"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div id="feedback"></div>
+        <div class="input-group">
+            <input type="number" id="userAnswer" step="5" placeholder="0">
+            <span>(°)</span>
+            <button id="checkBtn">Cek</button>
+        </div>
+        <button id="newAngleBtn">Sudut Baru</button>
+    </div>
+
+    <script>
+        const simulationContainer = document.querySelector('.simulation-container');
+        const protractor = document.getElementById('protractor');
+        const rotateHandle = document.getElementById('rotate-handle');
+        const canvas = document.getElementById('angleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const checkBtn = document.getElementById('checkBtn');
+        const newAngleBtn = document.getElementById('newAngleBtn');
+        const userAnswerInput = document.getElementById('userAnswer');
+        const feedback = document.getElementById('feedback');
+
+        let isDragging = false;
+        let isRotating = false;
+        let startX, startY;
+        let currentRotation = 0;
+        let correctAngle = 0;
+
+        function resizeCanvas() {
+            canvas.width = simulationContainer.offsetWidth;
+            canvas.height = simulationContainer.offsetHeight;
+            drawRandomAngle();
+        }
+
+        function drawRandomAngle() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // LOGIKA ACAK POSISI TITIK PUSAT
+            // Memberi margin agar tidak terlalu mepet ke pinggir (20% - 80% area)
+            const centerX = canvas.width * (0.2 + Math.random() * 0.6);
+            const centerY = canvas.height * (0.3 + Math.random() * 0.5); 
+            
+            const radius = 180;
+            correctAngle = (Math.floor(Math.random() * 33) + 2) * 5;
+
+            // Gambar Kaki Sudut 1 (Base)
+            ctx.beginPath();
+            ctx.strokeStyle = "#2f3542";
+            ctx.lineWidth = 4;
+            ctx.lineCap = "round";
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.stroke();
+
+            // Gambar Kaki Sudut 2 (Rotated)
+            const angleInRadians = -correctAngle * Math.PI / 180;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + radius * Math.cos(angleInRadians), centerY + radius * Math.sin(angleInRadians));
+            ctx.stroke();
+
+            // Titik Pusat Merah (Target pengukuran)
+            ctx.beginPath();
+            ctx.fillStyle = "#ff4757";
+            ctx.arc(centerX, centerY, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            feedback.textContent = "";
+            userAnswerInput.value = "";
+        }
+
+        // --- Logika Interaksi Busur ---
+        function getPos(e) {
+            const ev = e.touches ? e.touches[0] : e;
+            return { x: ev.clientX, y: ev.clientY };
+        }
+
+        function handleStart(e) {
+            const pos = getPos(e);
+            if (e.target === rotateHandle) {
+                isRotating = true;
+            } else {
+                isDragging = true;
+                startX = pos.x - protractor.offsetLeft;
+                startY = pos.y - protractor.offsetTop;
+            }
+        }
+
+        function handleMove(e) {
+            if (!isDragging && !isRotating) return;
+            const pos = getPos(e);
+
+            if (isDragging) {
+                protractor.style.left = (pos.x - startX) + 'px';
+                protractor.style.top = (pos.y - startY) + 'px';
+            }
+
+            if (isRotating) {
+                const rect = protractor.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height;
+                const angle = Math.atan2(pos.y - centerY, pos.x - centerX);
+                currentRotation = angle * (180 / Math.PI) + 90; 
+                protractor.style.transform = `rotate(${currentRotation}deg)`;
+            }
+        }
+
+        function handleEnd() { isDragging = false; isRotating = false; }
+
+        // Mouse Events
+        protractor.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        // Touch Events
+        protractor.addEventListener('touchstart', handleStart);
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+
+        checkBtn.addEventListener('click', () => {
+            const userVal = parseInt(userAnswerInput.value);
+            if (isNaN(userVal)) return;
+            if (userVal === correctAngle) {
+                feedback.innerHTML = `<span class="correct">Hebat! Jawabannya ${correctAngle}°</span>`;
+            } else {
+                feedback.innerHTML = `<span class="wrong">Masih salah, coba lagi!</span>`;
+            }
+        });
+
+        newAngleBtn.addEventListener('click', drawRandomAngle);
+        window.onload = resizeCanvas;
+    </script>
+</body>
+</html>

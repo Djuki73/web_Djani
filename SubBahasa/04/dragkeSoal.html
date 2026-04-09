@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What am I? - Mobile Friendly</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e8f5e9;
+            margin: 0;
+            padding: 10px; /* Padding luar agar tidak mentok layar HP */
+            box-sizing: border-box;
+        }
+
+        .game-container {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #1b5e20;
+            margin: 0 0 5px 0;
+            font-size: 1.5rem;
+        }
+
+        p {
+            color: #4caf50;
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .questions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .question-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f1f8e9;
+            padding: 8px 15px;
+            border-radius: 10px;
+            gap: 10px;
+        }
+
+        .question-text {
+            flex-grow: 1;
+            text-align: left;
+            color: #333;
+            font-size: 0.85rem; /* Ukuran font lebih kecil untuk mobile */
+            line-height: 1.2;
+        }
+
+        .drop-target {
+            width: 60px;  /* Mengecilkan kotak drop */
+            height: 60px;
+            flex-shrink: 0;
+            border: 2px dashed #9ccc65;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9fbe7;
+            position: relative;
+        }
+
+        /* Ikon feedback lebih kecil */
+        .feedback-icon {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            color: white;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .feedback-icon.show { opacity: 1; }
+        .feedback-icon.correct { background-color: #43a047; }
+        .feedback-icon.incorrect { background-color: #d32f2f; }
+
+        .draggable-images-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .draggable-image {
+            width: 55px; /* Gambar lebih kecil */
+            height: 55px;
+            object-fit: contain;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: grab;
+            touch-action: none;
+            background: white;
+        }
+
+        .drop-target img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+        }
+
+        #checkButton { background-color: #43a047; }
+        #resetButton { background-color: #607d8b; }
+
+        /* Media Query untuk Desktop (Layar Lebar) */
+        @media (min-width: 600px) {
+            h1 { font-size: 2rem; }
+            .question-text { font-size: 1rem; }
+            .drop-target, .draggable-image { width: 80px; height: 80px; }
+            .game-container { padding: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>What am I?</h1>
+        <p>Read and match the picture.</p>
+        
+        <div class="questions-container" id="qContainer"></div>
+        <div class="draggable-images-container" id="iContainer"></div>
+
+        <div class="button-container">
+            <button id="checkButton">Cek Jawaban</button>
+            <button id="resetButton">Ulang Soal</button>
+        </div>
+    </div>
+
+    <script>
+        const puzzles = [
+            { id: 'cabe', text: 'My color is red. I am oval. I taste spicy.', correctImage: 'cabe.png' },
+            { id: 'strawberry', text: 'I am sour. I am red and small. High Vit C.', correctImage: 'strawberry.png' },
+            { id: 'kopi', text: 'Liquid and black. I taste bitter. Drink in the morning.', correctImage: 'kopi.png' },
+            { id: 'keju', text: 'Yellow and made of milk. On pizza.', correctImage: 'keju.png' },
+            { id: 'donat', text: 'Round with a hole. I taste sweet.', correctImage: 'donat.png' }
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function init() {
+            const qC = document.getElementById('qContainer');
+            const iC = document.getElementById('iContainer');
+            qC.innerHTML = ''; iC.innerHTML = '';
+
+            const shuffled = [...puzzles];
+            shuffle(shuffled);
+
+            puzzles.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.className = 'question-item';
+                div.innerHTML = `
+                    <div class="question-text">${index + 1}. ${p.text}</div>
+                    <div class="drop-target" data-ans="${p.correctImage}">
+                        <div class="feedback-icon"></div>
+                    </div>
+                `;
+                qC.appendChild(div);
+            });
+
+            shuffled.forEach(p => {
+                const img = document.createElement('img');
+                img.className = 'draggable-image';
+                img.src = `img/${p.correctImage}`;
+                img.dataset.name = p.correctImage;
+                img.draggable = true;
+                
+                img.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', e.target.dataset.name));
+                iC.appendChild(img);
+            });
+
+            document.querySelectorAll('.drop-target').forEach(target => {
+                target.addEventListener('dragover', (e) => e.preventDefault());
+                target.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const name = e.dataTransfer.getData('text');
+                    if (!target.querySelector('img')) {
+                        const img = document.querySelector(`.draggable-image[data-name="${name}"]`);
+                        target.appendChild(img);
+                    }
+                });
+            });
+        }
+
+        document.getElementById('checkButton').addEventListener('click', () => {
+            document.querySelectorAll('.drop-target').forEach(target => {
+                const img = target.querySelector('img');
+                const icon = target.querySelector('.feedback-icon');
+                icon.classList.add('show');
+                if (img && img.dataset.name === target.dataset.ans) {
+                    icon.className = 'feedback-icon show correct';
+                    icon.textContent = '✓';
+                } else {
+                    icon.className = 'feedback-icon show incorrect';
+                    icon.textContent = '✕';
+                }
+            });
+        });
+
+        document.getElementById('resetButton').addEventListener('click', init);
+        init();
+    </script>
+</body>
+</html>

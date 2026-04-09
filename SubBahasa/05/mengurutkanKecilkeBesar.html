@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urutkan Angka</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            background-color: #f0f8ff; /* Biru muda */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #ff69b4; /* Pink */
+        }
+        .question-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .number-list {
+            display: flex;
+            gap: 10px;
+            background-color: #e6e6fa; /* Lavender */
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #b0c4de;
+        }
+        .number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4b0082; /* Ungu */
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            cursor: move;
+        }
+        .answer-list {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+        }
+        .answer-box {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4b0082;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .answer-box.correct {
+            background-color: #90ee90; /* Hijau muda */
+            border-color: #3cb371; /* Hijau */
+        }
+        .answer-box.wrong {
+            background-color: #ffcccb; /* Merah muda */
+            border-color: #dc143c; /* Merah */
+        }
+        .dragged {
+            opacity: 0.5;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        .check-button {
+            background-color: #87cefa; /* Biru muda */
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: transform 0.2s;
+        }
+        .check-button:hover {
+            transform: scale(1.05);
+            background-color: #6495ed;
+        }
+        .next-button {
+            background-color: #32cd32; /* Hijau cerah */
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: transform 0.2s;
+            display: none;
+        }
+        .next-button:hover {
+            transform: scale(1.05);
+            background-color: #228b22;
+        }
+        .reset-button {
+            background-color: #ff4500; /* Oranye kemerahan */
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: transform 0.2s;
+            display: none;
+        }
+        .reset-button:hover {
+            transform: scale(1.05);
+            background-color: #ff6347;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Urutkan Angka dari Terkecil</h1>
+        <div class="question-box">
+            <div id="number-list" class="number-list"></div>
+            <div style="font-size: 2em; margin: 0 10px;">➡️</div>
+            <div id="answer-list" class="answer-list"></div>
+        </div>
+        <div id="message" class="message"></div>
+        <button id="check-button" class="check-button">Periksa Jawaban</button>
+        <button id="next-button" class="next-button">Soal Selanjutnya</button>
+        <button id="reset-button" class="reset-button">Ulangi</button>
+    </div>
+
+    <script>
+        const numbers = [
+            [13, 15, 11, 18],
+            [17, 12, 19, 15],
+            [18, 11, 15, 13],
+            [14, 18, 10, 20]
+        ];
+        let currentQuestion = 0;
+        let isChecking = false;
+
+        const numberListEl = document.getElementById('number-list');
+        const answerListEl = document.getElementById('answer-list');
+        const messageEl = document.getElementById('message');
+        const checkButton = document.getElementById('check-button');
+        const nextButton = document.getElementById('next-button');
+        const resetButton = document.getElementById('reset-button');
+
+        function generateQuestion() {
+            if (currentQuestion >= numbers.length) {
+                messageEl.textContent = 'Selamat! Kamu sudah menyelesaikan semua soal! 🎉';
+                checkButton.style.display = 'none';
+                nextButton.style.display = 'none';
+                resetButton.style.display = 'none';
+                return;
+            }
+
+            const currentNumbers = numbers[currentQuestion];
+            numberListEl.innerHTML = '';
+            answerListEl.innerHTML = '';
+            isChecking = false;
+            messageEl.textContent = '';
+            
+            // Buat elemen angka yang bisa diseret
+            currentNumbers.forEach(num => {
+                const numEl = document.createElement('div');
+                numEl.className = 'number';
+                numEl.textContent = num;
+                numEl.draggable = true;
+                numEl.dataset.value = num;
+                numberListEl.appendChild(numEl);
+            });
+
+            // Buat kotak jawaban kosong
+            for (let i = 0; i < currentNumbers.length; i++) {
+                const answerBoxEl = document.createElement('div');
+                answerBoxEl.className = 'answer-box';
+                answerListEl.appendChild(answerBoxEl);
+            }
+            
+            checkButton.style.display = 'block';
+            nextButton.style.display = 'none';
+            resetButton.style.display = 'none';
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const numbers = document.querySelectorAll('.number');
+            const answerBoxes = document.querySelectorAll('.answer-box');
+
+            numbers.forEach(num => {
+                num.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', e.target.dataset.value);
+                    setTimeout(() => {
+                        e.target.classList.add('dragged');
+                    }, 0);
+                });
+                num.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragged');
+                });
+            });
+
+            answerBoxes.forEach(box => {
+                box.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                box.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (isChecking) return;
+                    
+                    const droppedValue = e.dataTransfer.getData('text/plain');
+                    const droppedElement = document.querySelector(`.number[data-value='${droppedValue}'].dragged`);
+
+                    if (box.children.length === 0) {
+                        box.textContent = droppedValue;
+                        box.dataset.value = droppedValue;
+                        if (droppedElement) {
+                            droppedElement.style.visibility = 'hidden';
+                        }
+                    } else if (droppedElement) {
+                         // Kembalikan elemen jika kotak sudah terisi
+                        droppedElement.style.visibility = 'visible';
+                    }
+                });
+            });
+        }
+        
+        checkButton.addEventListener('click', () => {
+            isChecking = true;
+            const userAnswers = [];
+            const answerBoxes = document.querySelectorAll('.answer-box');
+            let allFilled = true;
+            answerBoxes.forEach(box => {
+                if (box.dataset.value) {
+                    userAnswers.push(parseInt(box.dataset.value));
+                } else {
+                    allFilled = false;
+                }
+            });
+
+            if (!allFilled) {
+                messageEl.textContent = 'Silakan isi semua kotak jawaban!';
+                isChecking = false;
+                return;
+            }
+
+            // --- PERUBAHAN DI SINI: Kembali ke pengurutan dari terkecil ---
+            const sortedNumbers = numbers[currentQuestion].slice().sort((a, b) => a - b);
+            let isCorrect = true;
+            answerBoxes.forEach((box, index) => {
+                if (parseInt(box.dataset.value) === sortedNumbers[index]) {
+                    box.classList.add('correct');
+                } else {
+                    box.classList.add('wrong');
+                    isCorrect = false;
+                }
+            });
+
+            if (isCorrect) {
+                messageEl.textContent = '🎉 Hebat! Jawabanmu benar!';
+                checkButton.style.display = 'none';
+                nextButton.style.display = 'block';
+                resetButton.style.display = 'none';
+            } else {
+                messageEl.textContent = '❌ Jawabanmu kurang tepat. Silakan ulangi!';
+                resetButton.style.display = 'block';
+                checkButton.style.display = 'none';
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentQuestion++;
+            generateQuestion();
+        });
+
+        // Tambahkan event listener untuk tombol "Ulangi"
+        resetButton.addEventListener('click', () => {
+            generateQuestion();
+        });
+
+        // Jalankan game pertama kali
+        generateQuestion();
+    </script>
+</body>
+</html>
