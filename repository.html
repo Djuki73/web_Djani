@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Djani Wahyudi - Repositori Proyek</title>
+    
+    <style>
+        :root {
+            /* Definisi variabel warna */
+            --bg-dark: #1e1e2d;
+            --text-light: #ffffff;
+            --text-gray: #aaaaaa;
+            --accent-yellow: #ffc107;
+            --card-dark: #2a2a3a;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        
+        /* Header dan Navigasi (Sama dengan Index) */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--card-dark);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            color: var(--accent-yellow);
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--accent-yellow);
+        }
+
+        /* Repositori List */
+        .repo-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .repo-card {
+            background-color: var(--card-dark);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .repo-card h3 {
+            color: var(--accent-yellow);
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+
+        .repo-card p {
+            color: var(--text-gray);
+            margin-bottom: 15px;
+        }
+
+        .repo-links a {
+            display: inline-block;
+            background-color: var(--bg-dark);
+            color: var(--accent-yellow);
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-right: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .repo-links a:hover {
+            background-color: #3f3f5a; /* Warna hover yang lebih gelap */
+            color: #fff;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            nav {
+                margin-top: 15px;
+            }
+            nav a {
+                margin-left: 0;
+                margin-right: 15px;
+            }
+            .repo-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">Djani</div>
+            <nav>
+                <a href="index.html">Home</a>
+                <!-- Menyorot link yang sedang aktif -->
+                <a href="repository.html" style="color: var(--accent-yellow);">Portfolio</a>
+                <a href="#">Testimonial</a>
+                <a href="#">About</a>
+            </nav>
+        </header>
+        
+        <!-- JUDUL HALAMAN -->
+        <a href="index.html" class="back-button">&larr; Kembali ke Beranda</a>
+        <h1>Daftar Lengkap Repositori Buku Bahasa Indonesia kelas 1 SD</h1>
+
+        <!-- LIST REPOSITORI -->
+        <section class="repo-list">
+            
+            <div class="repo-card">
+                <div>
+                    <h3>Interaktif Bahasa Indonesia 1 SD</h3>
+                    <p>Materi Kelas 3 SD. Memperkenalkan konsep interaksi yang lebih kompleks dan narasi yang mendalam.</p>
+                </div>
+                <div class="repo-links">
+                    <a href="https://github.com/yourusername/bhs-indo-3sd" target="_blank">GitHub &rarr;</a>
+                    <a href="#" target="_blank">Demo Live</a>
+                </div>
+            </div>
+
+            <div class="repo-card">
+                <div>
+                    <h3>Interaktif Bahasa Indonesia 2 SD</h3>
+                    <p>Materi Kelas 3 SD. Memperkenalkan konsep interaksi yang lebih kompleks dan narasi yang mendalam.</p>
+                </div>
+                <div class="repo-links">
+                    <a href="https://github.com/yourusername/bhs-indo-3sd" target="_blank">GitHub &rarr;</a>
+                    <a href="#" target="_blank">Demo Live</a>
+                </div>
+            </div>
+            
+            <div class="repo-card">
+                <div>
+                    <h3>Interaktif Bahasa Indonesia 3 SD</h3>
+                    <p>Materi Kelas 3 SD. Memperkenalkan konsep interaksi yang lebih kompleks dan narasi yang mendalam.</p>
+                </div>
+                <div class="repo-links">
+                    <a href="https://github.com/yourusername/bhs-indo-3sd" target="_blank">GitHub &rarr;</a>
+                    <a href="#" target="_blank">Demo Live</a>
+                </div>
+            </div>
+            
+            <div class="repo-card">
+                <div>
+                    <h3>Interaktif Bahasa Indonesia 4 SD</h3>
+                    <p>Materi Kelas 4 SD. Repositori ini berisi modul *full-stack* untuk pengelolaan data interaktif dengan Firebase (atau sejenisnya).</p>
+                </div>
+                <div class="repo-links">
+                    <a href="https://github.com/yourusername/bhs-indo-4sd" target="_blank">GitHub &rarr;</a>
+                    <a href="#" target="_blank">Demo Live</a>
+                </div>
+            </div>
+            
+            <div class="repo-card">
+                <div>
+                    <h3>Interaktif Bahasa Indonesia 5 SD</h3>
+                    <p>Materi Kelas 5 SD. Repositori yang paling fokus pada aspek desain UI/UX mobile-first untuk pembelajaran.</p>
+                </div>
+                <div class="repo-links">
+                    <a href="https://github.com/yourusername/bhs-indo-5sd" target="_blank">GitHub &rarr;</a>
+                    <a href="#" target="_blank">Demo Live</a>
+                </div>
+            </div>
+            
+            <div class="repo-card">
+                <div>
+                    <h3>Interaktif Bahasa Indonesia 6 SD</h3>
+                    <p>Materi Kelas 6 SD. Repositori final yang merangkum semua teknik dan aset dari kelas sebelumnya.</p>
+                </div>
+                <div class="repo-links">
+                    <a href="https://github.com/yourusername/bhs-indo-6sd" target="_blank">GitHub &rarr;</a>
+                    <a href="#" target="_blank">Demo Live</a>
+                </div>
+            </div>
+
+        </section>
+        
+    </div>
+    
+    </body>
+</html>

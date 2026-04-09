@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persiapan Sekolah Bima</title>
+    
+    <style>
+        /* --- CSS UTAMA (DEFAULT/DESKTOP) --- */
+        
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f8ff;
+            overflow: hidden; /* Penting untuk menghindari scroll */
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 600px; 
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            align-items: stretch; 
+            padding: 0; 
+            box-sizing: border-box;
+        }
+
+        /* [CSS lainnya (Tas, Highlight, Objects) tetap sama untuk meminimalisir perubahan] */
+        .kamar-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            z-index: 0;
+        }
+
+        .tas-container {
+            position: absolute;
+            width: 80px; 
+            height: 10%; 
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: box-shadow 0.3s ease-in-out;
+            border-radius: 20px;
+        }
+        
+        .tas-highlight {
+            position: absolute;
+            width: 80px; 
+            height: 86px; 
+            border-radius: 10px;
+            z-index: 1; 
+        }
+        
+        .tas-image {
+            width: 20px;
+            height: 100%;
+            object-fit: contain;
+            z-index: 2; 
+            position: relative; 
+        }
+
+        .tas-highlight.highlight-green {
+            box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.7);
+        }
+
+        .tas-highlight.highlight-red {
+            box-shadow: 0 0 20px 10px rgba(255, 0, 0, 0.7);
+        }
+        
+        .objects-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        .draggable {
+            width: 80px; 
+            height: 80px; 
+            cursor: grab;
+            position: absolute;
+            object-fit: contain;
+            transition: left 0.4s ease-out, top 0.4s ease-out, transform 0.2s; 
+        }
+
+        /* --- MEDIA QUERY UNTUK SMARTPHONE LANDSCAPE --- */
+
+        @media only screen and (orientation: landscape) and (max-height: 700px) {
+            
+            /* Kontainer Game: Memenuhi layar dan rasio aspek diatur oleh tinggi */
+            .game-container {
+                width: 100vw; /* Lebar Viewport */
+                height: 100vh; /* Tinggi Viewport */
+                max-width: 100vw;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            /* Skala Semuanya Agar Sesuai: Menggunakan Transform Scale */
+            /* Ini akan menskala seluruh konten agar pas ke layar, tetapi 
+               lebih baik kita atur ulang layout agar lebih fleksibel */
+
+            /* Area Bermain (Diperluas untuk memenuhi layar) */
+            .room {
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            
+            .kamar-background {
+                 /* Mungkin lebih baik disembunyikan jika background_game sudah cukup */
+                display: none; 
+            }
+
+            /* Bima (Dikecilkan agar tidak mendominasi, dipindah ke sudut) */
+            .game-container > img[alt="Bima sedang membereskan"] {
+                top: 55% !important; 
+                left: 70% !important;
+                width: 25% !important;
+                height: auto !important;
+            }
+
+            /* Ukuran objek yang bisa di-drag diperkecil */
+            .draggable {
+                width: 6vh; /* Ukuran relatif terhadap tinggi viewport */
+                height: 6vh;
+            }
+
+            /* Tas/Dropzone (Diposisikan di area yang mudah dijangkau di sisi kanan) */
+            #backpack-dropzone {
+                top: 70% !important; 
+                left: 80% !important;
+                width: 10vh !important;
+                height: 12vh !important;
+            }
+
+            /* Highlight Overlay & Gambar Tas (Menyesuaikan ukuran tas baru) */
+            .tas-highlight {
+                width: 10vh !important;
+                height: 12vh !important;
+                top: 0 !important; 
+                left: 0 !important;
+            }
+            .tas-image {
+                width: 100% !important;
+                height: 100% !important;
+                top: 0 !important; 
+                left: 0 !important;
+            }
+
+            /* Penyesuaian Posisi Objek di Landscape (Disebarkan di sisi kiri dan tengah) */
+            /* Menggunakan vh/vw untuk posisi relatif terhadap layar */
+            
+            #bukuHijau { top: 15vh !important; left: 5vw !important; }
+            #bukuKuning { top: 15vh !important; left: 13vw !important; }
+            #bukuBiru { top: 15vh !important; left: 21vw !important; }
+
+            #pensilMerah { top: 30vh !important; left: 5vw !important; }
+            #pensilHijau { top: 30vh !important; left: 15vw !important; }
+            #pensilBiru { top: 30vh !important; left: 25vw !important; }
+
+            #penghapusBiru { top: 45vh !important; left: 5vw !important; }
+            #penghapusMerah { top: 45vh !important; left: 13vw !important; }
+            #penghapusKuning { top: 45vh !important; left: 21vw !important; }
+
+            #mobilan { top: 60vh !important; left: 5vw !important; width: 8vh; height: 8vh; } /* Mainan */
+            #pesawat { top: 60vh !important; left: 15vw !important; width: 8vh; height: 8vh; } /* Mainan */
+        }
+        
+        /* --- MEDIA QUERY TAMBAHAN (UNTUK PORTRAIT SANGAT KECIL) --- */
+        
+        @media only screen and (orientation: portrait) and (max-width: 600px) {
+            /* Pastikan kembali ke pengaturan Portrait yang kita buat sebelumnya */
+            .game-container {
+                height: 95vh; 
+            }
+            .kamar-background {
+                display: none;
+            }
+            .game-container > img[alt="Bima sedang membereskan"] {
+                top: 50px !important;
+                left: 70% !important;
+                width: 100px !important;
+                height: 120px !important;
+            }
+            .room {
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            .draggable {
+                width: 50px;
+                height: 50px;
+            }
+            #backpack-dropzone {
+                top: 80% !important; 
+                left: 50% !important;
+                transform: translateX(-50%); 
+                width: 60px !important;
+                height: 80px !important;
+            }
+            /* Posisi Objek di Portrait (Diambil dari kode sebelumnya) */
+            #bukuHijau { top: 100px !important; left: 10px !important; }
+            #bukuKuning { top: 110px !important; left: 60px !important; }
+            #bukuBiru { top: 120px !important; left: 110px !important; }
+            #pensilMerah { top: 180px !important; left: 15px !important; }
+            #pensilHijau { top: 190px !important; left: 70px !important; }
+            #pensilBiru { top: 200px !important; left: 125px !important; }
+            #penghapusBiru { top: 270px !important; left: 10px !important; }
+            #penghapusMerah { top: 280px !important; left: 60px !important; }
+            #penghapusKuning { top: 290px !important; left: 110px !important; }
+            #mobilan { top: 380px !important; left: 10px !important; width: 60px; height: 60px; } 
+            #pesawat { top: 390px !important; left: 80px !important; width: 60px; height: 60px; } 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container" 
+         style="
+             background-image: url('img/background_game.png'); 
+             background-size: cover; 
+             background-repeat: no-repeat;
+             background-position: center center;
+         ">
+        
+        <img src="img/bima.png" alt="Bima sedang membereskan" 
+             style="
+                 position: absolute; 
+                 top: 200px; 
+                 left: 560px; 
+                 width: 400px; 
+                 height: 410px; 
+                 z-index: 3; 
+             ">
+
+            <div id="backpack-dropzone" class="tas-container" 
+                 style="top: 340px; left: 730px;">
+                 
+                <div id="highlight-overlay" class="tas-highlight" 
+                     style="top: -10px; left: 20px;"></div> 
+                
+                <img src="img/tas.png" alt="Tas Sekolah" class="tas-image" 
+                     style="top: -50px; left: -20px;">
+            </div>
+
+            <div class="objects-container">
+                
+                <img id="bukuHijau" src="img/buku_hijau.png" alt="Buku Hijau" class="draggable school-item" 
+                    style="top: 380px; left: 300px; width: 100px; height: 100px;">
+                <img id="bukuKuning" src="img/buku_kuning.png" alt="Buku Kuning" class="draggable school-item"
+                    style="top: 370px; left: 350px; width: 100px; height: 100px;">
+                <img id="bukuBiru" src="img/buku_biru.png" alt="Buku Biru" class="draggable school-item"
+                    style="top: 300px; left: 410px; width: 100px; height: 100px;">
+                
+                <img id="pensilMerah" src="img/pensilMerah.png" alt="Pensil Merah" class="draggable school-item"
+                    style="top: 500px; left: 590px; width: 120px; height: 120px;">
+                <img id="pensilHijau" src="img/pensilHijau.png" alt="Pensil Hijau" class="draggable school-item"
+                    style="top: 495px; left: 540px; width: 120px; height: 120px;">
+                <img id="pensilBiru" src="img/pensilBiru.png" alt="Pensil Biru" class="draggable school-item"
+                    style="top: 490px; left: 500px; width: 120px; height: 120px;">
+                
+                <img id="penghapusBiru" src="img/penghapusBiru.png" alt="Penghapus Biru" class="draggable school-item"
+                    style="top: 430px; left: 800px; width: 60px; height: 60px;">
+                <img id="penghapusMerah" src="img/penghapusMerah.png" alt="Penghapus Merah" class="draggable school-item"
+                    style="top: 416px; left: 780px; width: 60px; height: 60px;">
+                <img id="penghapusKuning" src="img/penghapusKuning.png" alt="Penghapus Kuning" class="draggable school-item"
+                    style="top: 420px; left: 750px; width: 60px; height: 60px;">
+                
+                <img id="mobilan" src="img/mobilan.png" alt="Mobil-mobilan" class="draggable non-school-item"
+                    style="top: 350px; left: 150px; width: 120px; height: 120px;">
+                <img id="pesawat" src="img/pesawat.png" alt="Pesawat-pesawatan" class="draggable non-school-item"
+                    style="top: 500px; left: 350px; width: 120px; height: 120px;">
+                    
+                </div>
+        </div>
+    </div>
+    
+    <div id="popupOverlay" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none; 
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    ">
+        <div style="
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.8);
+            border: 5px solid gold;
+        ">
+            <h2 style="color: #4CAF50;">Selamat! Semua Beres! 🎉</h2>
+            <p>Bima siap berangkat sekolah dengan tas yang rapi.</p>
+            <button id="restartButton" style="
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 1.1em;
+                margin-top: 20px;
+            ">
+                Ulangi Permainan
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript untuk Logika Drag and Drop, Efek Sinar, dan Kemenangan
+        document.addEventListener('DOMContentLoaded', () => {
+            const draggables = document.querySelectorAll('.draggable');
+            const backpackDropzone = document.getElementById('backpack-dropzone');
+            const highlightOverlay = document.getElementById('highlight-overlay');
+            const popupOverlay = document.getElementById('popupOverlay'); 
+            const restartButton = document.getElementById('restartButton'); 
+            
+            let draggedItem = null;
+            let originalPosition = {};
+            
+            const schoolItems = document.querySelectorAll('.school-item');
+            const totalSchoolItems = schoolItems.length;
+            let itemsPacked = 0;
+            
+            // Fungsi untuk memeriksa kemenangan
+            function checkWin() {
+                if (itemsPacked === totalSchoolItems) {
+                    popupOverlay.style.display = 'flex'; 
+                }
+            }
+            
+            // Fungsi untuk mereset permainan
+            function resetGame() {
+                itemsPacked = 0;
+                popupOverlay.style.display = 'none';
+                
+                // Reset posisi dan tampilan semua item sekolah
+                schoolItems.forEach(item => {
+                    item.style.display = 'block';
+                    item.classList.add('draggable');
+                    
+                    const pos = originalPosition[item.id];
+                    item.style.left = `${pos.x}px`;
+                    item.style.top = `${pos.y}px`;
+                });
+            }
+
+            // Simpan posisi awal setiap objek dari inline style
+            draggables.forEach(item => {
+                const style = window.getComputedStyle(item);
+                originalPosition[item.id] = { 
+                    x: parseInt(style.left), 
+                    y: parseInt(style.top) 
+                };
+                
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = item;
+                    e.dataTransfer.setData('text/plain', item.id); // Penting untuk mobile
+                    setTimeout(() => {
+                        item.classList.add('dragging');
+                    }, 0);
+                });
+
+                item.addEventListener('dragend', () => {
+                    if (draggedItem) {
+                        draggedItem.classList.remove('dragging');
+                        draggedItem = null;
+                    }
+                });
+            });
+            
+            // Event listener untuk tombol ulang
+            restartButton.addEventListener('click', resetGame); 
+
+            // Event listener untuk area drop (tas)
+            backpackDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            backpackDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+
+                if (!draggedItem) {
+                    const itemId = e.dataTransfer.getData('text/plain');
+                    draggedItem = document.getElementById(itemId);
+                }
+
+                if (draggedItem) {
+                    const isSchoolItem = draggedItem.classList.contains('school-item');
+                    
+                    highlightOverlay.classList.remove('highlight-green', 'highlight-red'); 
+
+                    if (isSchoolItem) {
+                        highlightOverlay.classList.add('highlight-green'); 
+                        
+                        if (draggedItem.style.display !== 'none') { 
+                             itemsPacked++; 
+                        }
+                        
+                        draggedItem.style.display = 'none';
+                        draggedItem.classList.remove('draggable');
+                        
+                        setTimeout(checkWin, 800); 
+
+                    } else {
+                        highlightOverlay.classList.add('highlight-red'); 
+                        
+                        const pos = originalPosition[draggedItem.id];
+                        draggedItem.style.left = `${pos.x}px`;
+                        draggedItem.style.top = `${pos.y}px`;
+                    }
+                    
+                    setTimeout(() => {
+                        highlightOverlay.classList.remove('highlight-green', 'highlight-red'); 
+                    }, 800);
+                    
+                    draggedItem = null; // Reset draggedItem setelah drop
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Menjodohkan</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e4f7bf;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .game-container {
+            width: 95%;
+            max-width: 1000px; 
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            height: 700px; 
+            align-items: stretch; 
+            background-image: url('mod/back02.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            background-color: rgba(248, 234, 234, 0.5);
+        }
+        .match-area {
+            display: flex;
+            flex-direction: column;
+            gap: 0; 
+            /* Merapatkan ke tengah */
+            flex-basis: 25%; 
+            height: 45%; 
+            /* Keseimbangan Vertikal */
+            justify-content: space-between; 
+            padding: 170px 0; /* Padding disederhanakan dari 180px */
+        }
+        /* Penataan khusus untuk kolom Tengah */
+        #middle-column {
+            /* Merapatkan ke tengah */
+            flex-basis: 45%; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px; 
+            align-items: center;
+            height: 80%; 
+            justify-content: space-around; 
+            padding: 50px 0;
+        }
+
+        .match-row {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 0;
+            width: 100%;
+            /* Sentralkan konten agar dot menempel teks */
+            justify-content: center; 
+        }
+        
+        .item-text {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #444;
+            text-align: center;
+            /* Kotak teks pendek */
+            display: inline-block; 
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+            margin: 0; 
+        }
+        
+        /* Penataan DOT AGAR MENEMPEL TEKS */
+        .match-row .dot[data-side="middle-left"] {
+            margin-right: -2px; 
+            z-index: 11; 
+        }
+        .match-row .dot[data-side="middle-right"] {
+            margin-left: -2px; 
+            z-index: 11;
+        }
+        
+        /* Ubah tampilan untuk item gambar */
+        .image-item-container { 
+            width: 120px;
+            height: 80px;
+            border: 2px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .image-item-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        /* Penataan dot di samping gambar (kiri/kanan) */
+        .left-area .match-row {
+            justify-content: flex-end; 
+        }
+        .left-area .match-row .dot {
+            margin-left: 10px;
+        }
+        .right-area .match-row {
+            justify-content: flex-start; 
+        }
+        .right-area .match-row .dot {
+            margin-right: 10px;
+        }
+
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: #007bff;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 10;
+        }
+        .dot:hover {
+            transform: scale(1.3);
+            background-color: #0056b3;
+        }
+        .dot.temp-connected {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .action-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        #check-button {
+            background-color: #28a745;
+        }
+        #check-button:hover {
+            background-color: #218838;
+        }
+        #reset-button {
+            background-color: #dc3545;
+        }
+        #reset-button:hover {
+            background-color: #c82333;
+        }
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        line {
+            stroke-width: 3;
+            transition: stroke 0.3s ease;
+        }
+        line.correct {
+            stroke: #28a745;
+        }
+        line.incorrect {
+            stroke: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Permainan Menjodohkan</h1>
+    <p>Hubungkan titik biru pada gambar dengan teks suara yang sesuai.</p>
+
+    <div class="game-container">
+    </div>
+    
+    <div class="button-group">
+        <button id="check-button" class="action-button">Periksa Jawaban</button>
+        <button id="reset-button" class="action-button">Ulangi Permainan</button>
+    </div>
+
+    <div id="popupOverlay" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none; 
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    ">
+        <div style="
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.8);
+            border: 5px solid gold;
+        ">
+            <h2 style="color: #4CAF50;">Selamat! Permainan Selesai! 🎉</h2>
+            <p>Anda telah menyelesaikan semua jodoh yang ada.</p>
+            <button id="restartButton" style="
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 1.1em;
+                margin-top: 20px;
+            ">
+                Ulangi Permainan
+            </button>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const gameContainer = document.querySelector('.game-container');
+        const checkButton = document.getElementById('check-button');
+        const resetButton = document.getElementById('reset-button');
+        // Mendapatkan elemen popup
+        const popupOverlay = document.getElementById('popupOverlay');
+        const restartButton = document.getElementById('restartButton');
+
+        const TOTAL_CONNECTIONS = 6; // 3 koneksi kiri + 3 koneksi kanan
+        
+        const data = [
+            { id: 'A', text: 'Dugg dugg dugg', value: 14, imageLeft: 'mod/bola_basket.png', imageRight: 'mod/bola_basket.png' },
+            { id: 'B', text: 'Cuit cuit cuit', value: 19, imageLeft: 'mod/burung.png', imageRight: 'mod/burung.png' },
+            { id: 'C', text: 'Tet tet tet tet', value: 17, imageLeft: 'mod/klakson_mobil.png', imageRight: 'mod/klakson_mobil.png' },
+            { id: 'D', text: 'Teng teng teng', value: 15, imageLeft: 'mod/lonceng.png', imageRight: 'mod/lonceng.png' },
+            { id: 'E', text: 'Kring kring', value: 12, imageLeft: 'mod/rem_sepeda.png', imageRight: 'mod/rem_sepeda.png' },
+            { id: 'F', text: 'Plok plok plok', value: 16, imageLeft: 'mod/tepuk_tangan.png', imageRight: 'mod/tepuk_tangan.png' }
+        ];
+
+        let selectedDot = null;
+        let connections = []; 
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createGame() {
+            gameContainer.innerHTML = '';
+            document.querySelectorAll('svg').forEach(svg => svg.remove());
+            selectedDot = null;
+            connections = [];
+            
+            // Gambar Kiri dan Kanan STATIS (Tidak diacak)
+            const dataLeft = data.slice(0, 3);
+            const dataRight = data.slice(3, 6); 
+            
+            // Teks Tengah DIACAK
+            const middleItems = [...data]; 
+            shuffleArray(middleItems); 
+
+            // --- 1. Area Kiri (Gambar Kiri - STATIS) ---
+            const leftArea = document.createElement('div');
+            leftArea.className = 'match-area left-area';
+            dataLeft.forEach(item => { 
+                const row = document.createElement('div');
+                row.className = 'match-row';
+                row.innerHTML = `
+                    <div class="image-item-container"><img src="${item.imageLeft}" alt="Gambar ${item.value}"></div>
+                    <div class="dot" data-value="${item.value}" data-id="${item.id}" data-side="left"></div>
+                `;
+                leftArea.appendChild(row);
+            });
+            gameContainer.appendChild(leftArea);
+
+            // --- 2. Area Tengah (Teks - DIACAK) ---
+            const middleArea = document.createElement('div');
+            middleArea.className = 'match-area';
+            middleArea.id = 'middle-column';
+            middleItems.forEach(item => { 
+                const row = document.createElement('div');
+                row.className = 'match-row';
+                row.style.width = '100%';
+                row.innerHTML = `
+                    <div class="dot" data-value="${item.value}" data-id="${item.id}" data-side="middle-left"></div>
+                    <div class="item-text">${item.text}</div>
+                    <div class="dot" data-value="${item.value}" data-id="${item.id}" data-side="middle-right"></div>
+                `;
+                middleArea.appendChild(row);
+            });
+            gameContainer.appendChild(middleArea);
+
+            // --- 3. Area Kanan (Gambar Kanan - STATIS) ---
+            const rightArea = document.createElement('div');
+            rightArea.className = 'match-area right-area';
+            dataRight.forEach(item => { 
+                const row = document.createElement('div');
+                row.className = 'match-row';
+                row.innerHTML = `
+                    <div class="dot" data-value="${item.value}" data-id="${item.id}" data-side="right"></div>
+                    <div class="image-item-container"><img src="${item.imageRight}" alt="Lambang ${item.value}"></div>
+                `;
+                rightArea.appendChild(row);
+            });
+            gameContainer.appendChild(rightArea);
+
+
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.addEventListener('click', handleDotClick);
+            });
+
+            // Tambahkan SVG layer untuk garis
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = 'drawing-layer';
+            document.body.appendChild(svg);
+        }
+
+        function getAbsoluteDotCenter(dot) {
+            const rect = dot.getBoundingClientRect();
+            const bodyRect = document.body.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2 - bodyRect.left,
+                y: rect.top + rect.height / 2 - bodyRect.top
+            };
+        }
+        
+        // FUNGSI BARU: Cek Kemenangan
+        function checkWin() {
+            if (connections.length === TOTAL_CONNECTIONS) {
+                // Tampilkan popup
+                popupOverlay.style.display = 'flex';
+            }
+        }
+
+
+        function handleDotClick(event) {
+            const clickedDot = event.target;
+
+            if (clickedDot.classList.contains('temp-connected')) {
+                return; 
+            }
+
+            if (!selectedDot) {
+                selectedDot = clickedDot;
+                selectedDot.style.backgroundColor = '#ffc107';
+            } else if (selectedDot === clickedDot) {
+                selectedDot.style.backgroundColor = '';
+                selectedDot = null;
+            } else {
+                const firstSide = selectedDot.dataset.side;
+                const secondSide = clickedDot.dataset.side;
+
+                const isLeftMatch = (firstSide === 'left' && secondSide === 'middle-left') || 
+                                    (firstSide === 'middle-left' && secondSide === 'left');
+                
+                const isRightMatch = (firstSide === 'right' && secondSide === 'middle-right') ||
+                                     (firstSide === 'middle-right' && secondSide === 'right');
+                
+                if (isLeftMatch || isRightMatch) {
+                    const line = drawConnection(selectedDot, clickedDot, '#007bff');
+                    connections.push({
+                        dot1: selectedDot,
+                        dot2: clickedDot,
+                        line: line
+                    });
+                    
+                    selectedDot.classList.add('temp-connected');
+                    clickedDot.classList.add('temp-connected');
+                    selectedDot.style.backgroundColor = '';
+                    selectedDot = null;
+                    
+                    // Menonaktifkan event click pada dot yang sudah terhubung
+                    selectedDot.removeEventListener('click', handleDotClick);
+                    clickedDot.removeEventListener('click', handleDotClick);
+                    
+                    // PANGGIL checkWin setelah koneksi berhasil
+                    checkWin(); 
+
+                } else {
+                    alert('Hanya bisa menghubungkan Sisi Kiri ke Kiri Tengah, atau Sisi Kanan ke Kanan Tengah.');
+                    selectedDot.style.backgroundColor = '';
+                    selectedDot = null;
+                }
+            }
+        }
+
+        function drawConnection(dot1, dot2, color) {
+            const svg = document.getElementById('drawing-layer');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+
+            const pos1 = getAbsoluteDotCenter(dot1);
+            const pos2 = getAbsoluteDotCenter(dot2);
+
+            line.setAttribute('x1', pos1.x);
+            line.setAttribute('y1', pos1.y);
+            line.setAttribute('x2', pos2.x);
+            line.setAttribute('y2', pos2.y);
+            line.setAttribute('stroke', color);
+            
+            svg.appendChild(line);
+            return line;
+        }
+
+        function checkAnswers() {
+            connections.forEach(conn => {
+                const value1 = conn.dot1.dataset.value;
+                const value2 = conn.dot2.dataset.value;
+                
+                conn.line.classList.remove('correct', 'incorrect');
+
+                if (value1 === value2) {
+                    conn.line.classList.add('correct');
+                } else {
+                    conn.line.classList.add('incorrect');
+                }
+            });
+        }
+
+        function resetGame() {
+            // Sembunyikan popup saat game di-reset
+            popupOverlay.style.display = 'none'; 
+            createGame();
+        }
+        
+        checkButton.addEventListener('click', checkAnswers);
+        resetButton.addEventListener('click', resetGame);
+        // Hubungkan tombol restart di popup ke resetGame
+        restartButton.addEventListener('click', resetGame); 
+
+        createGame();
+    });
+</script>
+</body>
+</html>
